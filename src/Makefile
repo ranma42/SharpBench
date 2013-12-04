@@ -1,7 +1,14 @@
-all: ExampleBench.dll BenchRunner.exe
+TARGETS = \
+	ExampleBench.dll \
+	ArrayBench.Core.dll \
+	ArrayBench.Impl.dll \
+	BenchRunner.exe \
+	$(NULL)
+
+all: $(TARGETS)
 
 clean:
-	rm -f ExampleBench.dll BenchRunner.exe SharpBench*.dll
+	rm -f $(TARGETS) SharpBench*.dll
 
 fast: SharpBench.Fast.dll
 	cp $^ SharpBench.dll
@@ -15,11 +22,15 @@ SharpBench.Fast.dll : SharpBench.fs
 SharpBench.Accurate.dll : SharpBench.fs
 	fsharpc -a -o $@ $^
 
-ExampleBench.dll : ExampleBench.fs
-	fsharpc -a -r:SharpBench.dll -o $@ $<
-
-BenchRunner.exe : BenchRunner.fs
+BenchRunner.exe : BenchRunner.fs SharpBench.dll
 	fsharpc -r:SharpBench.dll -r:MathNet.Numerics.FSharp.dll -o $@ $<
 
-ExampleBench.dll : SharpBench.dll
-BenchRunner.exe : SharpBench.dll
+
+ExampleBench.dll : ExampleBench.fs SharpBench.dll
+	fsharpc -a -r:SharpBench.dll -o $@ $<
+
+ArrayBench.Core.dll : ArrayBench.fs
+	fsharpc -a -d:CORE -r:SharpBench.dll -o $@ $<
+
+ArrayBench.Impl.dll : ArrayBench.fs
+	fsharpc -a -r:SharpBench.dll -o $@ $<
