@@ -10,16 +10,7 @@ all: $(TARGETS)
 clean:
 	rm -f $(TARGETS) SharpBench*.dll
 
-fast: SharpBench.Fast.dll
-	cp $^ SharpBench.dll
-
-accurate: SharpBench.Accurate.dll
-	cp $^ SharpBench.dll 
-
-SharpBench.Fast.dll : SharpBench.fs
-	fsharpc -a -d:FAST -o $@ $^
-
-SharpBench.Accurate.dll : SharpBench.fs
+SharpBench.dll : SharpBench.fs
 	fsharpc -a -o $@ $^
 
 BenchRunner.exe : BenchRunner.fs SharpBench.dll

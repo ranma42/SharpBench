@@ -4,13 +4,13 @@ namespace SharpBench
 
   module Core =
 
-#if FAST
-    let private defaultSamples = 100
-    let private defaultTime = 1.0
-#else
-    let private defaultSamples = 10000
-    let private defaultTime = 100.0
-#endif
+    let private defaultSamples =
+      try Int32.Parse(Environment.GetEnvironmentVariable("SHARPBENCH_SAMPLES"))
+      with | _ -> 100
+
+    let private defaultTime =
+      try Double.Parse(Environment.GetEnvironmentVariable("SHARPBENCH_TIME"))
+      with | _ -> 1.0
 
     [<AttributeUsage(AttributeTargets.Method,AllowMultiple=false)>]
     type BenchAttribute (name:string) =
