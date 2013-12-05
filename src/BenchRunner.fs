@@ -216,7 +216,7 @@ namespace SharpBench
             printfn " - %8.3g %% with %s" (v*100.0) name
 
         printfn ""
-      else
+      else if not raw then
         printf "%4.3g" (r2 * 100.0)
         printf " %8.3g" avgT
         for v,name in Seq.zip beta labels do
