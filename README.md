@@ -9,7 +9,7 @@ numerics](http://numerics.mathdotnet.com).
 # Building
 
     $ cd src
-    $ make fast all
+    $ make
 
 # Running
 
@@ -19,7 +19,8 @@ assemblies and verbosity can be controlled with the `SHARPBENCH_RAW`
 and `SHARPBENCH_DETAILED` boolean flags:
 
     $ SHARPBENCH_DETAILED=true mono BenchRunner.exe ExampleBench.dll
-    $ SHARPBENCH_RAW=true mono BenchRunner.exe ExampleBench.dll ArrayBench.dll > bench.dat
+    $ SHARPBENCH_RAW=true mono BenchRunner.exe ExampleBench.dll > bench.dat
+    $ mono BenchRunner.exe ArrayBench.Core.dll ArrayBench.Impl.dll
 
 * SHARPBENCH_DETAILED defaults to false; when set to true it will
   provide an explanation of the numerical results of the benchmark
