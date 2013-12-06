@@ -22,12 +22,24 @@ and `SHARPBENCH_DETAILED` boolean flags:
     $ SHARPBENCH_RAW=true mono BenchRunner.exe ExampleBench.dll > bench.dat
     $ mono BenchRunner.exe ArrayBench.Core.dll ArrayBench.Impl.dll
 
-* SHARPBENCH_DETAILED defaults to false; when set to true it will
-  provide an explanation of the numerical results of the benchmark
+There are several environment variables which affect the behavior of
+the benchmark:
+
+* SHARPBENCH_DETAILED defaults to false; when set to true BenchRunner
+  will provide an explanation of the numerical results of the
+  benchmark
 
 * SHARPBENCH_RAW defaults to false; when set to true it will cause
   BenchRunner to dump all of the measurements in CSV and the computed
   results in lines which begin with a '#'
+
+
+* SHARPBENCH_SAMPLES defaults to 100; it indicates how many samples
+  BenchRunner will try to measure in order to perform the
+  decomposition
+
+* SHARPBENCH_TIME defaults to 10.0 seconds; it indicates how much time
+  BenchRunner should spend benchmarking each method
 
 # Background
 
