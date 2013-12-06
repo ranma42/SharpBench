@@ -1,4 +1,5 @@
 TARGETS = \
+	SharpBench.dll \
 	ExampleBench.dll \
 	ArrayBench.Core.dll \
 	ArrayBench.Impl.dll \
@@ -8,7 +9,7 @@ TARGETS = \
 all: $(TARGETS)
 
 clean:
-	rm -f $(TARGETS) SharpBench*.dll
+	rm -f $(TARGETS)
 
 SharpBench.dll : SharpBench.fs
 	fsharpc -a -o $@ $^
