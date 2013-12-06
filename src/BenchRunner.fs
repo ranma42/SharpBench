@@ -107,7 +107,7 @@ namespace SharpBench
     let private rand = new Random()
     let private nextIters totIters remainingSamples =
       let remainingTime = endT - lastT |> max 1.0
-      let elapsedTime = lastT - startT
+      let elapsedTime = lastT - startT |> max 1.0e-10
       (*
       let remainingTimePerSample = remainingTime / float(remainingSamples)
       let avgTimePerIter = elapsedTime / float(totIters)
@@ -117,14 +117,16 @@ namespace SharpBench
       let p = float(remainingSamples) * elapsedTime / (float(totIters) * remainingTime)
       let q = 1.0 - p |> max minQ
       let n = Math.Log(1.0 - rand.NextDouble(), q)
-      if n < 0.0 then
+      if Double.IsNaN(n) then
+        1
+      elif n < 0.0 then
         printfn "%A %A" totIters remainingSamples
         printfn "%A %A" elapsedTime remainingTime
         printfn "%A %A" q n
         sprintf "Unexpected error (total iters: %A, remaining samples: %A, elapsed ms: %A, remaining ms: %A; q: %A, n: %A"
           totIters remainingSamples elapsedTime remainingTime q n
         |> failwith
-      else if n >= maxIters then
+      elif n >= maxIters then
         Int32.MaxValue
       else
         int(n)
@@ -216,7 +218,7 @@ namespace SharpBench
             printfn " - %8.3g %% with %s" (v*100.0) name
 
         printfn ""
-      else if not raw_data then
+      elif not raw_data then
         printf "%4.3g" (r2 * 100.0)
         printf " %8.3g" avgT
         for v,name in Seq.zip beta labels do
