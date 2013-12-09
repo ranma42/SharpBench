@@ -5,6 +5,8 @@ namespace SharpBench
   open System.Reflection
   open SharpBench.Core
   open System
+  open System.Diagnostics
+  open System.Threading
 
   module Analysis =
     let private averageRows x =
@@ -66,14 +68,17 @@ namespace SharpBench
 
     let private predictors = 5
 
-    let private proc = System.Diagnostics.Process.GetCurrentProcess()
-    let mutable private lastT = 0.0
-    let mutable private lastC0 = 0
-    let mutable private lastC1 = 0
+    let private watch = Stopwatch.StartNew()
+    let mutable private lastT = LanguagePrimitives.GenericZero<_>
+    let mutable private lastC0 = LanguagePrimitives.GenericZero<_>
+    let mutable private lastC1 = LanguagePrimitives.GenericZero<_>
+
+    let private ticksToMs x =
+      float(x) * 1000.0 / float(Stopwatch.Frequency)
 
     let private getT () =
-      let t = proc.TotalProcessorTime.TotalMilliseconds
-      let dt  = t - lastT
+      let t = watch.ElapsedTicks
+      let dt = t - lastT
       lastT <- t
       dt
 
@@ -98,23 +103,23 @@ namespace SharpBench
       y.[sample]   <- getT ()
 
 
-    let mutable private startT = 0.0
-    let mutable private endT = 0.0
+    let mutable private startT = LanguagePrimitives.GenericZero<_>
+    let mutable private endT = LanguagePrimitives.GenericZero<_>
 
     let private maxIters = float Int32.MaxValue
     let private minQ = 2.0 / maxIters
 
     let private rand = new Random()
     let private nextIters totIters remainingSamples =
-      let remainingTime = endT - lastT |> max 1.0
-      let elapsedTime = lastT - startT |> max 1.0e-10
+      let remainingTime = endT - lastT |> max LanguagePrimitives.GenericOne<_>
+      let elapsedTime = lastT - startT
       (*
       let remainingTimePerSample = remainingTime / float(remainingSamples)
       let avgTimePerIter = elapsedTime / float(totIters)
       let desiredItersPerSample = remainingTimePerSample / avgTimePerIter
       let p = 1.0 / desiredItersPerSample
       *)
-      let p = float(remainingSamples) * elapsedTime / (float(totIters) * remainingTime)
+      let p = float(remainingSamples) * float(elapsedTime) / (float(totIters) * float(remainingTime))
       let q = 1.0 - p |> max minQ
       let n = Math.Log(1.0 - rand.NextDouble(), q)
       if Double.IsNaN(n) then
@@ -146,7 +151,7 @@ namespace SharpBench
       GC.Collect()
       saveMeasures x y 0 0
       startT <- lastT
-      endT <- startT + attr.TargetTime * 1000.0
+      endT <- startT + int64(attr.TargetTime * float(Stopwatch.Frequency))
 
       let mutable iters = 1
       let mutable totIters = 0L
@@ -157,6 +162,7 @@ namespace SharpBench
         totIters <- totIters + int64(iters)
         iters <- samples - sample |> nextIters totIters
 
+      let y = y |> Array.map ticksToMs
       let r2,beta,gamma,corr = analyze (x |> Array2D.map float) y
 
       if raw_data then
@@ -245,6 +251,14 @@ namespace SharpBench
       with | _ -> ()
 
       try raw_data <- Boolean.Parse(Environment.GetEnvironmentVariable("SHARPBENCH_RAW"))
+      with | _ -> ()
+
+      let proc = Process.GetCurrentProcess()
+      try proc.ProcessorAffinity <- 2n
+      with | _ -> ()
+      try proc.PriorityClass <- ProcessPriorityClass.High
+      with | _ -> ()
+      try Thread.CurrentThread.Priority <- ThreadPriority.Highest
       with | _ -> ()
 
       for name in args do
